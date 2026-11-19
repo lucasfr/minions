@@ -21,6 +21,9 @@ The project overview, objectives and conventions are in [PROJECT.md](PROJECT.md)
 | [Ariadne](minions/ariadne.md) | 🛠️ Technical | Navigating codebases and tooling, orientation notes |
 | [Asclepius](minions/asclepius.md) | 🩺 Health and physiology | Appraising physiology and clinical literature |
 | [Morpheus](minions/morpheus.md) | 🩺 Health and physiology | Sleep and circadian topics |
+| [Argus](minions/argus.md) | 🩺 Health and physiology | Neuroimaging data handling, preprocessing and quality control |
+| [Athena](minions/athena.md) | 🩺 Health and physiology | Neuroscience literature, mechanisms and interpretation |
+| [Tiresias](minions/tiresias.md) | 🩺 Health and physiology | What neuroimaging and neural signals can and cannot support |
 | [Momus](minions/momus.md) | 🧭 Cross-cutting | Critical review of code, assumptions and text |
 | [Hermes](minions/hermes.md) | 🧭 Cross-cutting | Literature search, retrieval and citation handling |
 | [Calliope](minions/calliope.md) | 🧭 Cross-cutting | Drafting prose in the repo's plain, dry register |
@@ -40,6 +43,9 @@ minions/
     ├── ariadne.md
     ├── asclepius.md
     ├── morpheus.md
+    ├── argus.md
+    ├── athena.md
+    ├── tiresias.md
     ├── momus.md
     ├── hermes.md
     ├── calliope.md

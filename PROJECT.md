@@ -21,6 +21,9 @@ No works listed yet. Add them here as they are defined.
 | Ariadne | Technical | Navigating codebases and tooling, orientation notes | [minions/ariadne.md](minions/ariadne.md) |
 | Asclepius | Health and physiology | Appraising physiology and clinical literature | [minions/asclepius.md](minions/asclepius.md) |
 | Morpheus | Health and physiology | Sleep and circadian topics | [minions/morpheus.md](minions/morpheus.md) |
+| Argus | Health and physiology | Neuroimaging data handling, preprocessing and quality control | [minions/argus.md](minions/argus.md) |
+| Athena | Health and physiology | Neuroscience literature, mechanisms and interpretation | [minions/athena.md](minions/athena.md) |
+| Tiresias | Health and physiology | What neuroimaging and neural signals can and cannot support | [minions/tiresias.md](minions/tiresias.md) |
 | Momus | Cross-cutting (review) | Critical review of code, assumptions and text | [minions/momus.md](minions/momus.md) |
 | Hermes | Cross-cutting (literature) | Literature search, retrieval and citation handling | [minions/hermes.md](minions/hermes.md) |
 | Calliope | Cross-cutting (writing) | Drafting prose in the repo's plain, dry register | [minions/calliope.md](minions/calliope.md) |
