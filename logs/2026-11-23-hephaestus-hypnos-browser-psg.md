@@ -3,18 +3,34 @@
 **Minion:** Hephaestus
 **Date:** 2026-11-23
 **Chat:** HEPHAESTUS - hypnos browser PSG metrics (title proposed; Lucas applies it from the chat menu)
-**Repo touched:** `hypnos` (working tree, not committed). Read only: `mrpheus`, `hypnoR`, `website`.
+**Repo touched:** `hypnos` and `website` (the website changes are listed below). Read only: `mrpheus`, `hypnoR`.
 **Requested by Lucas:** a page that runs in the browser, takes an EDF file and returns standard PSG markers, with no data sent to a server; design to match the Circadia website; LightGBM workaround in hypnos only, mrpheus left alone for now.
 
 ## Status
 
-Runs end to end on `DLBP33N3.edf` (786.4 MiB, 44 signals), per Lucas's report. I have no browser, so every runtime fact below comes from log lines Lucas pasted. The layout edits after the two-column version (tighter spacing, hero removed, clinical markers moved under the log, hypnogram and spectrogram height) were written but I have not seen the result.
+Runs end to end on `DLBP33N3.edf` (786.4 MiB, 44 signals), per Lucas's report. I have no browser, so every runtime fact below comes from log lines or screenshots Lucas sent. Written but not seen by me: the layout changes after the two-column version, the Plotly plots, the icons, the welcome screen, the footer and the logo (Lucas called the spectrogram version and the latest logo good). Not run: the website changes. Git state at the last `git status` Lucas pasted: `style.css` and `vendor/hypnor-hex.svg` modified; `favicon.png`, `logo.png` (copies of the lab logo, now unused) and `models/` untracked. The `models/` decision, and a YASA licence file beside it, is open.
 
 ## What was built (`hypnos/`)
 
 - `index.html`, `style.css`: Circadia palette and fonts (Playfair Display, Alice), glass cards and pills, light and dark by system setting. Left column: status pills, EDF picker, progress and log, clinical markers. Right column: stage composition, hypnogram, spectrogram, CSV downloads.
 - `app.js`: boots webR, installs `mrpheus`, `hypnoR`, `jsonlite` from `circadia-bio.r-universe.dev` plus `repo.r-wasm.org`, checks that mrpheus's imports are present, then runs the pipeline one R call at a time with per-stage timing, progress bar and elapsed timer.
 - `analysis.R`: the pipeline stages, a pure-R predictor for the LightGBM text model, and the JSON returned to the page.
+
+### Added later in the same chat
+
+- **Plots:** the hypnogram and spectrogram are Plotly (cartesian bundle 2.35.2 from jsDelivr, `cdn.plot.ly` as fallback): hover, zoom, pan and reset, with the two time axes linked. The stage composition bar is still HTML.
+- **Icons:** Bootstrap Icons v1.11.1, the same font as `circadia-lab.uk`, self-hosted in `vendor/` (copied from `website/_site/site_libs/bootstrap/`). The icon names were checked against that CSS.
+- **Welcome screen** (`welcome.js`, markup in `index.html`): after NotedApp's onboarding. Four steps, progress dots, Skip and Next, remembered in `localStorage` (`hypnos_welcomed`, version `0.1.0`; after a version bump only the last step is shown), reopened from the navbar "About" link. Step 1 shows the mrpheus and hypnoR hexes. `vendor/hypnor-hex.svg` is a copy of the hypnoR logo with a cropped `viewBox`, so both hexes render at the same size; the artwork is unchanged.
+- **Footer:** "Made with" line with the mrpheus and hypnoR navbar icons, an MIT licence line, and a disclaimer about YASA (attribution, independence from the YASA authors, markers not validated for clinical use, research tool, not a medical device). The wording is mine and has not been reviewed for legal use.
+- **Licence:** MIT `LICENSE`, "Copyright (c) 2026 Lucas França, Mario Leocadio-Miguel", the same as hypnoR.
+- **Logo** (`logo.svg`, `favicon.svg`): a pocket watch swinging on a chain like a pendulum, with a motion trail, on a blue gradient. The first attempt was a hex sticker, which was wrong because hexes are for R packages only. The second (flat, ghost outlines, dotted chain) looked dated to Lucas. The third is the current one. Checked by rendering in the sandbox at 512, 64, 36, 32 and 16 px, not in a browser.
+
+### Website (`website/`)
+
+- `projects/projects.yml`: hypnos entry (Web App, Sleep, Open Source). `projects/hypnos/index.qmd`: project page, with a status note matching the app's disclaimer.
+- `index.qmd`: hypnos card in the "Our tools & software" carousel (tag "App"). `_quarto.yml`: `hypnos-icon.svg` added to `resources`. `convert_og_images.py`: `hypnos_logo` added to its list.
+- `projects/images/hypnos_logo.svg` and `hypnos-icon.svg` (the small-size variant) are the same logo as in the app.
+- Assumptions and gaps: the app URL `https://hypnos.circadia-lab.uk` is assumed from the naming pattern; `hypnos_logo_og.png` does not exist until `convert_og_images.py` is run, and the project page refers to it; there is no `zenodo.yml` entry, because the hypnos repo has no `.zenodo.json` or `CITATION.cff`; the Quarto site has not been rendered.
 
 ## Pipeline as it stands
 
@@ -41,11 +57,27 @@ Runs end to end on `DLBP33N3.edf` (786.4 MiB, 44 signals), per Lucas's report. I
 - `prepare_psg()` and `preprocess_psg()` copy every channel into a list per epoch, which is heavy in a 32-bit WASM heap.
 - `compute_sleep_architecture()` returns NA for TST if any stage is NA. Not reached here, because artefact epochs are not passed to staging.
 - The reduced EDF drops the annotations channel and is written as plain EDF; discontinuous EDF+D files would lose their record timing.
-- The page loads webR (`latest`, unpinned) and Google Fonts from CDNs. The "no data leaves your device" pill is true of the EDF; a strict claim needs both self-hosted.
-- `logo.png` and `favicon.png` are referenced and must be copied from `website/`.
+- The page loads webR (`latest`, unpinned), Plotly (pinned) and Google Fonts from CDNs. The "no data leaves your device" pill is true of the EDF; a strict claim needs all three self-hosted.
+- `logo.png` and `favicon.png` (the Circadia lab logo, copied from `website/` earlier) are no longer used by the page and can be deleted.
+- If `models/yasa_staging.txt` is committed to hypnos, YASA's BSD 3-Clause notice should sit beside it (`models/LICENSE-YASA`). Not written, because I could not confirm the exact text.
+
+## Future improvement: EEG channel selection
+
+Current logic (`pickChannels()` in `app.js`, then `hypnos_features()` in `analysis.R`): the header labels are tested in file order against `EEG|C3|C4|F3|F4|O1|O2|Fpz|Pz`, then `EOG|ROC|LOC`, then `EMG|chin|Chin` (case-sensitive substrings, the same as `prepare_psg()`), and the first match of each type is loaded. R then takes the first non-flat EEG channel from the reduced file, which is the one already chosen. On `DLBP33N3` this picked `F3:A2`.
+
+Weaknesses:
+
+- No preference for central derivations, although YASA was trained on them. A frontal channel can come first, as it did here.
+- The patterns are loose. `O2` matches `SpO2`, so an oximetry channel listed before the real EEG would be taken as EEG. The same holds for `Pz`, `C3` and similar substrings inside other labels.
+- No quality check (flat, noisy, wrong reference, sampling rate), and no fallback: only one EEG channel is extracted, so a bad choice cannot be replaced in R.
+
+Proposed: rank the candidates (C4, then C3, then Cz, then the rest) and exclude labels such as `SpO2` in `pickChannels()`, leaving mrpheus alone. Optionally, let the user choose the channel in the page. Re-check the markers on `DLBP33N3` afterwards, because the channel may explain part of the unusual values.
 
 ## Next
 
 - Check the markers on a recording with a trusted hypnogram before anyone relies on them.
+- EEG channel selection, above.
 - Decide on the mrpheus fixes (`duration_s`, optional `lightgbm`, model in the WASM build).
 - Further markers (spindles, slow oscillations, band power per stage, AHI/ODI, HRV) need a cheaper preprocessing step first, probably downsampling before filtering.
+- Self-host webR, Plotly and the fonts, and pin the webR version, if the privacy claim is to be strict.
+- Review the footer disclaimer and licence wording.
